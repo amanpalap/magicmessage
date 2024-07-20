@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
 
 export default function Component() {
     const { toast } = useToast()
@@ -102,16 +103,54 @@ export default function Component() {
                                 <FormItem>
                                     <FormLabel>Username</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="shadcn" {...field} />
+                                        <Input
+                                            placeholder="Username" {...field}
+                                            onChange={(e) => {
+                                                field.onChange(e)
+                                                setUsername(e.target.value)
+                                            }}
+                                        />
                                     </FormControl>
-                                    <FormDescription>
-                                        This is your public display name.
-                                    </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit">Submit</Button>
+                        <FormField
+                            name="email"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>email</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="email" {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            name="password"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>password</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="password"
+                                            placeholder="password" {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" disabled={issubmitting}>
+                            {
+                                issubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Signup"
+                            }
+                        </Button>
                     </form>
                 </Form>
                 <div className="text-center mt-4">
@@ -123,7 +162,7 @@ export default function Component() {
                     </p>
                 </div>
             </div>
-        </div>
+        </div >
     )
 
 }
