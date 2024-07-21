@@ -14,7 +14,6 @@ import { ApiResponse } from "@/types/ApiResponse"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -23,66 +22,30 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
+import { signInSchema } from "@/schemas/verifySchema"
+import { signIn } from "next-auth/react"
 
 export default function Component() {
     const { toast } = useToast()
     const router = useRouter()
-    const [username, setUsername] = useState('')
-    const [isCheckUsername, setIsCheckingUsername] = useState(false)
-    const [usernameMessage, setUsernameMessage] = useState('')
     const [issubmitting, setIsSubmitting] = useState(false)
-    const debounced = useDebounceValue(username, 300)
 
     //Zod implementation
 
-    const form = useForm<z.infer<typeof signUpSchema>>({
-        resolver: zodResolver(signUpSchema),
+    const form = useForm<z.infer<typeof signInSchema>>({
+        resolver: zodResolver(signInSchema),
         defaultValues: {
-            username: '',
             email: '',
             password: '',
         }
     })
 
-    useEffect(() => {
-        const checkUsernameUnique = async () => {
-            if (debounced.length > 0) {
-                setIsCheckingUsername(true)
-            }
-            setUsernameMessage('')
-            try {
-                const response = await axios.get(`/api/check-username-unique?username=${debounced}`)
-                setUsernameMessage(response.data.message)
-            } catch (error) {
-                const axiosError = error as AxiosError<ApiResponse>
-                setUsernameMessage(axiosError.response?.data.message ?? "Error checking username")
-            } finally {
-                setIsCheckingUsername(false)
-            }
-        }
-        checkUsernameUnique()
-    }, [username])
-
-    const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
-        setIsSubmitting(true)
-        try {
-            const response = await axios.post<ApiResponse>('/api/sign-up', data)
-            toast({
-                title: 'Success',
-                description: response.data.message,
-            })
-            router.replace(`/verify/${username}`)
-            setIsSubmitting(false)
-        } catch (error) {
-            const axiosError = error as AxiosError<ApiResponse>
-            let errorMessage = axiosError.response?.data.message
-            toast({
-                title: 'Success',
-                description: errorMessage,
-                variant: "destructive"
-            })
-            setIsSubmitting(false)
-        }
+    const onSubmit = async (data: z.infer<typeof signInSchema>) => {
+        const result = await signIn('credentials', {
+            redirect: false,
+            identifier: data.identifier,
+            password: data.password
+        })
     }
 
     return (
@@ -96,27 +59,9 @@ export default function Component() {
                 </div>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+
                         <FormField
-                            name="username"
-                            control={form.control}
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Username</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Username" {...field}
-                                            onChange={(e) => {
-                                                field.onChange(e)
-                                                setUsername(e.target.value)
-                                            }}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            name="email"
+                            name="identifier"
                             control={form.control}
                             render={({ field }) => (
                                 <FormItem>
