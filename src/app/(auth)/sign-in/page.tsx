@@ -35,7 +35,7 @@ export default function Component() {
     const form = useForm<z.infer<typeof signInSchema>>({
         resolver: zodResolver(signInSchema),
         defaultValues: {
-            email: '',
+            identifier: '',
             password: '',
         }
     })
@@ -46,6 +46,23 @@ export default function Component() {
             identifier: data.identifier,
             password: data.password
         })
+        if (result?.error) {
+            toast({
+                title: 'Login Failed',
+                description: "Incorrect username or password",
+                variant: "destructive"
+            })
+        } else {
+            toast({
+                title: 'Error',
+                description: result?.error,
+                variant: "destructive"
+            })
+        }
+
+        if (result?.url) {
+            router.replace('/dashboard')
+        }
     }
 
     return (
@@ -53,7 +70,7 @@ export default function Component() {
             <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
                 <div className="text-center">
                     <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
-                        Welcome Back to True Feedback
+                        Join Mystery Message
                     </h1>
                     <p className="mb-4">Sign in to continue your secret conversations</p>
                 </div>
@@ -92,9 +109,7 @@ export default function Component() {
                             )}
                         />
                         <Button type="submit" disabled={issubmitting}>
-                            {
-                                issubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Signup"
-                            }
+                            Signin
                         </Button>
                     </form>
                 </Form>
